@@ -1,13 +1,11 @@
-from utils import read_data, shuffle_split_data
-from classifier import pick_best_model, predict
+from data_treatment import read_data
+from classifier import pick_best_model
 
 
 def main():
-	x, y = read_data()
-	x, _, y, _ = shuffle_split_data(x, y, 0.9999, True)  # Pruning data just for testing
-	config, best_model, tokenizer = pick_best_model('modelo', x, y)
-	
-	print(predict('modelo', ['EZPIZI']))
+	x, y = read_data('data/pruned_entries.tsv')
+	identifier = "modelo_1"
+	config, best_model, tokenizer = pick_best_model(identifier, x, y)
 
 
 if __name__ == '__main__':

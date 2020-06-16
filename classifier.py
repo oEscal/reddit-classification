@@ -6,9 +6,11 @@ from nltk.tokenize import word_tokenize
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras import Sequential, layers
-from utils import shuffle_split_data, read_model, save_model
+from utils import read_model, save_model
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import train_test_split
+import json
 
 download('punkt')
 download('stopwords')
@@ -44,6 +46,11 @@ def convert_input(x_train, x_test, max_len, num_words=5000):
 	return x_train, x_test, vocab_size, tokenizer
 
 
+def shuffle_split_data(x, y, test_size=0.25, shuffle=True):
+	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=0, shuffle=shuffle)
+	return x_train, x_test, y_train, y_test
+
+
 def create_model(num_filters, kernel_size, vocab_size, embedding_dim, max_len):
 	model = Sequential()
 	model.add(layers.Embedding(vocab_size, embedding_dim, input_length=max_len))
@@ -56,9 +63,9 @@ def create_model(num_filters, kernel_size, vocab_size, embedding_dim, max_len):
 
 
 def pick_best_model(identifier, x, y, max_len=100, param_grid=None, embedding_dim=50, epochs=20, n_jobs=-1,
-                    batch_size=10):
+                    batch_size=10, save_logs=True):
 	x = [tokenize(text) for text in x]
-	x_train, x_test, y_train, y_test = shuffle_split_data(x, y, 0.25, True)
+	x_train, x_test, y_train, y_test = shuffle_split_data(x, y, 0.2, True)
 	x_train, x_test, vocab_size, tokenizer = convert_input(x_train, x_test, max_len)
 
 	if param_grid is None:
@@ -84,6 +91,17 @@ def pick_best_model(identifier, x, y, max_len=100, param_grid=None, embedding_di
 			'max_len': max_len,
 			'padding': 'post'
 		}
+
+		if save_logs:
+			logs_file = f'logs/{identifier}.logs'
+			with open(logs_file, 'a') as f:
+				info = {
+					'model_identifier': identifier,
+					'full_dataset_size': len(x),
+					'Best accuracy': grid_result.best_score_,
+					'Test accuracy': grid.score(x_test, y_test)
+				}
+				json.dump(info, f)
 
 		save_model(identifier, config, best_model, tokenizer)
 

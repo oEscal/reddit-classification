@@ -1,21 +1,15 @@
-import csv
-from sklearn.model_selection import train_test_split
 import json
 import pickle
 from pathlib import Path
 
 
-def read_data(file_path='data/entries.tsv'):
-	x, y = [], []
+def occurrences_per_label(y):
+	labels = set(y)
+	data = {}
+	for label in labels:
+		data[label] = y.count(label)
 
-	with open(file_path) as f:
-		rows = list(csv.reader(f, delimiter='\t', quotechar='"'))
-		for row in rows:
-			identifier, theme, title, text = row
-			x.append(text)
-			y.append(theme)
-
-	return x, y
+	return data
 
 
 def read_model(identifier, path='models'):
@@ -47,6 +41,3 @@ def save_model(identifier, config, model, tokenizer, path='models'):
 		pickle.dump(tokenizer, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def shuffle_split_data(x, y, test_size=0.25, shuffle=True):
-	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=0, shuffle=shuffle)
-	return x_train, x_test, y_train, y_test
