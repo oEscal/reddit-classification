@@ -5,13 +5,14 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from keras.preprocessing.sequence import pad_sequences
 from keras import Sequential, layers
-from utils import read_model, save_model, prune_vocabulary
+from utils import read_model, save_model, prune_vocabulary, prune_vocabulary_until_normalized
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import train_test_split
 import json
 from sklearn.feature_extraction.text import TfidfVectorizer
-import numpy as np
+from sklearn.feature_extraction.text import CountVectorizer
+
 download('punkt')
 download('stopwords')
 download('wordnet')
@@ -36,10 +37,11 @@ def convert_input(x_train, x_test):
 
     x_train_v = vectorizer.fit_transform(x_train)
     terms = vectorizer.get_feature_names()
-    pruned_terms_index, _ = prune_vocabulary(x_train_v, terms)
 
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2),
-                                 vocabulary=[terms[term_index] for term_index in pruned_terms_index])
+    pruned_terms_index, _, _ = prune_vocabulary_until_normalized(x_train_v, terms, limit=100)
+    pruned_terms = [terms[term_index] for term_index in pruned_terms_index]
+
+    vectorizer = CountVectorizer(vocabulary=pruned_terms)
 
     x_train = vectorizer.fit_transform(x_train).todense()
     x_test = vectorizer.transform(x_test).todense()
@@ -52,30 +54,18 @@ def shuffle_split_data(x, y, test_size=0.25, shuffle=True):
     return x_train, x_test, y_train, y_test
 
 
-def create_model(num_filters, kernel_size, vocab_size, embedding_dim, max_len):
+def create_model(input_dim):
     model = Sequential()
-    model.add(layers.Embedding(vocab_size, embedding_dim, input_length=max_len))
-    model.add(layers.Conv1D(num_filters, kernel_size, activation='relu'))
-    model.add(layers.GlobalMaxPooling1D())
-    model.add(layers.Dense(100, activation='relu'))
-    model.add(layers.Dense(1, activation='sigmoid'))
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-
-    return model
-
-
-def create_model2(max_len):
-    model = Sequential()
-    model.add(layers.Dense(100, input_dim=max_len, activation="relu"))
+    model.add(layers.Dense(100, activation="relu", input_dim=input_dim))
     model.add(layers.Dense(50, activation="relu"))
-    model.add(layers.Dense(25, activation="relu"))
-    model.add(layers.Dense(1, activation="sigmoid"))
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.add(layers.Dense(1, activation='sigmoid'))
+    model.compile(optimizer='nadam', loss='binary_crossentropy', metrics=['accuracy'])
+
     return model
 
 
-def pick_best_model(identifier, x, y, param_grid=None, embedding_dim=100, epochs=5, n_jobs=-1,
-                    batch_size=20, save_logs=True):
+def pick_best_model(identifier, x, y, param_grid=None, epochs=200, n_jobs=-1,
+                    batch_size=50, save_logs=True):
     x = [tokenize(text) for text in x]
 
     x_train, x_test, y_train, y_test = shuffle_split_data(x, y, 0.2, True)
@@ -83,20 +73,13 @@ def pick_best_model(identifier, x, y, param_grid=None, embedding_dim=100, epochs
 
     if param_grid is None:
         param_grid = {
-           "num_filters": [32, 64, 128, 256],
-           "kernel_size": [3, 5, 7],
-           "vocab_size": [vocab_size],
-           "embedding_dim": [embedding_dim],
-            "max_len": [x_train.shape[1]]
+            "input_dim": [x_train.shape[1]]
         }
 
         model = KerasClassifier(build_fn=create_model, epochs=epochs, batch_size=batch_size, verbose=True)
 
         grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid, cv=min(4, len(y_train)), verbose=2,
-                                  n_iter=5, n_jobs=n_jobs)
-
-
-
+                                  n_jobs=n_jobs)
 
         grid_result = grid.fit(x_train, y_train)
         best_model = grid_result.best_estimator_
