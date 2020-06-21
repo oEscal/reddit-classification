@@ -55,7 +55,7 @@ def create_model(input_dim):
     model = Sequential()
     model.add(layers.Dense(100, activation="relu", input_dim=input_dim))
     model.add(layers.Dense(100, activation="relu"))
-    model.add(layers.Dense(50, activation='softmax'))
+    model.add(layers.Dense(100, activation='softmax'))
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
     return model
