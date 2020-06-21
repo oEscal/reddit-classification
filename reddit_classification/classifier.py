@@ -2,8 +2,8 @@ import string
 from nltk import download, WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from keras import Sequential, layers
-from keras.wrappers.scikit_learn import KerasClassifier
+from tensorflow.keras import Sequential, layers
+from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from .utils import read_model, save_model, prune_vocabulary_until_normalized, save_logs
