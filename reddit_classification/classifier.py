@@ -1,17 +1,17 @@
 import string
+import json
+
 from nltk import download, WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from keras.preprocessing.sequence import pad_sequences
 from keras import Sequential, layers
-from utils import read_model, save_model, prune_vocabulary_until_normalized
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import train_test_split
-import json
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import CountVectorizer
-import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+
+from reddit_classification.utils import read_model, save_model, prune_vocabulary_until_normalized
 
 download('punkt')
 download('stopwords')
