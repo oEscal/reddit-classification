@@ -5,10 +5,13 @@ from .utils import read_model, save_model, save_logs, tokenize, convert_input, s
 from matplotlib import pyplot as plt
 
 
-def create_model(input_dim, labels_size):
+def create_model(input_dim, labels_size, regularization_factor=0.001):
     model = Sequential()
-    model.add(layers.Dense(50, activation="relu", input_dim=input_dim, kernel_regularizer=regularizers.l2(l=0.001)))
-    model.add(layers.Dense(50, activation="relu", kernel_regularizer=regularizers.l2(l=0.001)))
+    model.add(layers.Dense(100, activation="relu", input_dim=input_dim,
+                           kernel_regularizer=regularizers.l2(l=regularization_factor)))
+    model.add(layers.Dropout(0.1))
+    model.add(layers.Dense(100, activation="relu", kernel_regularizer=regularizers.l2(l=regularization_factor)))
+    model.add(layers.Dropout(0.1))
     model.add(layers.Dense(labels_size, activation='softmax'))
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
@@ -50,7 +53,7 @@ def pick_best_model(identifier, x, y, output_path, epochs=50, batch_size=500, sa
         }
         save_logs(identifier, data)
 
-    save_model(identifier, config, model, tf, output_path)
+    save_model(identifier, config, model.model.get_weights(), tf, output_path)
 
     return history, config, model, tf
 

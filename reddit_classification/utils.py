@@ -29,7 +29,7 @@ def tokenize(text, language='english'):
     return ' '.join(words)
 
 
-def convert_input(x_train, x_test, limit=200, min_df=10):
+def convert_input(x_train, x_test, limit=500, min_df=10):
     tfidf = TfidfVectorizer(ngram_range=(1, 2), min_df=min_df)
 
     x_train_v = tfidf.fit_transform(x_train)
@@ -124,13 +124,13 @@ def save_model(identifier, config, model, tokenizer, path='models'):
     full_path = f'{path}/{identifier}'
     Path(full_path).mkdir(parents=True, exist_ok=True)
 
-    with open(f'{full_path}config.json', 'w') as f:
+    with open(f'{full_path}/config.json', 'w') as f:
         json.dump(config, f)
 
-    with open(f'{full_path}model.bin', 'wb') as f:
-        pickle.dump(model.model, f)
+    with open(f'{full_path}/model.bin', 'wb') as f:
+        pickle.dump(model, f)
 
-    with open(f'{full_path}tokenizer.bin', 'wb') as f:
+    with open(f'{full_path}/tokenizer.bin', 'wb') as f:
         pickle.dump(tokenizer, f)
 
 
