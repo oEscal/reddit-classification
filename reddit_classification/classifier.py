@@ -13,6 +13,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
 from utils import read_model, save_model, prune_vocabulary_until_normalized
 
+
 download('punkt')
 download('stopwords')
 download('wordnet')
@@ -110,7 +111,7 @@ def pick_best_model(identifier, x, y, output_path, param_grid=None, epochs=200, 
                 }
                 json.dump(info, f)
 
-        save_model(identifier, config, best_model, tokenizer)
+        save_model(identifier, config, best_model, tokenizer, output_path)
 
         return config, best_model, tokenizer
 
