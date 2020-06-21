@@ -2,10 +2,10 @@ import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 
-from utils import occurrences_per_label, knee_finder, sort_data_by_tfidf_frequency, \
+from .utils import occurrences_per_label, knee_finder, sort_data_by_tfidf_frequency, \
     prune_vocabulary_until_normalized
-from data_treatment import read_data
-from classifier import shuffle_split_data, convert_input, tokenize
+from .data_treatment import read_data
+from .classifier import shuffle_split_data, convert_input, tokenize
 
 
 def data_distribution(title, labels, counters, path):

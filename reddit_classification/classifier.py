@@ -11,7 +11,7 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
-from utils import read_model, save_model, prune_vocabulary_until_normalized
+from .utils import read_model, save_model, prune_vocabulary_until_normalized
 
 
 download('punkt')
