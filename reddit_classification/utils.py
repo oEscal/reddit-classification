@@ -17,6 +17,7 @@ download('wordnet')
 
 
 def tokenize(text, language='english'):
+
     tokens = word_tokenize(text)
     tokens = [w.lower() for w in tokens]
     table = str.maketrans('', '', string.punctuation)
@@ -29,7 +30,7 @@ def tokenize(text, language='english'):
     return ' '.join(words)
 
 
-def convert_input(x_train, x_test, limit=500, min_df=10):
+def convert_input(x_train, x_test, limit=200, min_df=10):
     tfidf = TfidfVectorizer(ngram_range=(1, 2), min_df=min_df)
 
     x_train_v = tfidf.fit_transform(x_train)
@@ -146,3 +147,6 @@ def save_logs(identifier, data, path='logs'):
             'Test accuracy': data.get('test_acc', -1)
         }
         json.dump(info, f)
+
+
+

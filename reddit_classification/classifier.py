@@ -3,15 +3,15 @@ from tensorflow.keras import Sequential, layers
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from .utils import read_model, save_model, save_logs, tokenize, convert_input, shuffle_split_data
 from matplotlib import pyplot as plt
+import numpy as np
 
 
-def create_model(input_dim, labels_size, regularization_factor=0.001):
+def create_model(input_shape, labels_size, regularization_factor=0.001):
     model = Sequential()
-    model.add(layers.Dense(100, activation="relu", input_dim=input_dim,
-                           kernel_regularizer=regularizers.l2(l=regularization_factor)))
-    model.add(layers.Dropout(0.1))
-    model.add(layers.Dense(100, activation="relu", kernel_regularizer=regularizers.l2(l=regularization_factor)))
-    model.add(layers.Dropout(0.1))
+    model.add(layers.Conv1D(64, 7, activation='relu', input_shape=input_shape))
+    model.add(layers.Dense(50, activation="relu", kernel_regularizer=regularizers.l2(l=regularization_factor)))
+    model.add(layers.Dense(50, activation="relu", kernel_regularizer=regularizers.l2(l=regularization_factor)))
+    model.add(layers.Dense(50, activation="relu", kernel_regularizer=regularizers.l2(l=regularization_factor)))
     model.add(layers.Dense(labels_size, activation='softmax'))
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
@@ -19,15 +19,21 @@ def create_model(input_dim, labels_size, regularization_factor=0.001):
 
 
 def pick_best_model(identifier, x, y, output_path, epochs=50, batch_size=500, save_logs_status=True):
+    print("OLA")
     x = [tokenize(text) for text in x]
+    print("Adeus")
 
     x_train, x_test, y_train, y_test = shuffle_split_data(x, y, 0.2, True)
     x_train, x_test, tf = convert_input(x_train, x_test)
+
+    x_train = np.expand_dims(x_train, 0)
+    x_test = np.expand_dims(x_test, 0)
+
     vocab_size = len(tf.get_feature_names())
     labels_size = len(set(y))
 
     model = KerasClassifier(build_fn=create_model, epochs=epochs, batch_size=batch_size, verbose=True,
-                            validation_split=0.2, input_dim=vocab_size, labels_size=labels_size)
+                            validation_split=0.2, input_shape=x_train.shape[1:], labels_size=labels_size)
 
     history = model.fit(x_train, y_train)
 
