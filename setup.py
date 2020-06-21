@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='reddit_classification',
-    version='0.0.1',
+    version='0.0.2',
     description='TAA project 2 package',
     author='Pedro Escaleira and Rafael Simões',
     author_email='pedroescaleira@hotmail.com',
