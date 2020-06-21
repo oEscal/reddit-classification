@@ -1,137 +1,135 @@
 import string
+import json
 
 from nltk import download, WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from keras.preprocessing.sequence import pad_sequences
 from keras import Sequential, layers
-from utils import read_model, save_model, prune_vocabulary
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import train_test_split
-import json
 from sklearn.feature_extraction.text import TfidfVectorizer
-import numpy as np
+
+from utils import read_model, save_model, prune_vocabulary
+
 download('punkt')
 download('stopwords')
 download('wordnet')
 
 
 def tokenize(text, language='english'):
-    tokens = word_tokenize(text)
-    tokens = [w.lower() for w in tokens]
-    table = str.maketrans('', '', string.punctuation)
-    words = [w.translate(table) for w in tokens]
-    stop_words = set(stopwords.words(language))
-    stop_words.add('lb')
+	tokens = word_tokenize(text)
+	tokens = [w.lower() for w in tokens]
+	table = str.maketrans('', '', string.punctuation)
+	words = [w.translate(table) for w in tokens]
+	stop_words = set(stopwords.words(language))
+	stop_words.add('lb')
 
-    lemmatizer = WordNetLemmatizer()
-    words = [lemmatizer.lemmatize(w, pos="v") for w in words if w not in stop_words]
+	lemmatizer = WordNetLemmatizer()
+	words = [lemmatizer.lemmatize(w, pos="v") for w in words if w not in stop_words]
 
-    return ' '.join(words)
+	return ' '.join(words)
 
 
 def convert_input(x_train, x_test):
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2))
+	vectorizer = TfidfVectorizer(ngram_range=(1, 2))
 
-    x_train_v = vectorizer.fit_transform(x_train)
-    terms = vectorizer.get_feature_names()
-    pruned_terms_index, _ = prune_vocabulary(x_train_v, terms)
+	x_train_v = vectorizer.fit_transform(x_train)
+	terms = vectorizer.get_feature_names()
+	pruned_terms_index, _ = prune_vocabulary(x_train_v, terms)
 
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2),
-                                 vocabulary=[terms[term_index] for term_index in pruned_terms_index])
+	vectorizer = TfidfVectorizer(ngram_range=(1, 2),
+	                             vocabulary=[terms[term_index] for term_index in pruned_terms_index])
 
-    x_train = vectorizer.fit_transform(x_train).todense()
-    x_test = vectorizer.transform(x_test).todense()
+	x_train = vectorizer.fit_transform(x_train).todense()
+	x_test = vectorizer.transform(x_test).todense()
 
-    return x_train, x_test, len(vectorizer.get_feature_names()), vectorizer
+	return x_train, x_test, len(vectorizer.get_feature_names()), vectorizer
 
 
 def shuffle_split_data(x, y, test_size=0.25, shuffle=True):
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=42, shuffle=shuffle)
-    return x_train, x_test, y_train, y_test
+	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=42, shuffle=shuffle)
+	return x_train, x_test, y_train, y_test
 
 
 def create_model(num_filters, kernel_size, vocab_size, embedding_dim, max_len):
-    model = Sequential()
-    model.add(layers.Embedding(vocab_size, embedding_dim, input_length=max_len))
-    model.add(layers.Conv1D(num_filters, kernel_size, activation='relu'))
-    model.add(layers.GlobalMaxPooling1D())
-    model.add(layers.Dense(100, activation='relu'))
-    model.add(layers.Dense(1, activation='sigmoid'))
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+	model = Sequential()
+	model.add(layers.Embedding(vocab_size, embedding_dim, input_length=max_len))
+	model.add(layers.Conv1D(num_filters, kernel_size, activation='relu'))
+	model.add(layers.GlobalMaxPooling1D())
+	model.add(layers.Dense(100, activation='relu'))
+	model.add(layers.Dense(1, activation='sigmoid'))
+	model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-    return model
+	return model
 
 
 def create_model2(max_len):
-    model = Sequential()
-    model.add(layers.Dense(100, input_dim=max_len, activation="relu"))
-    model.add(layers.Dense(50, activation="relu"))
-    model.add(layers.Dense(25, activation="relu"))
-    model.add(layers.Dense(1, activation="sigmoid"))
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-    return model
+	model = Sequential()
+	model.add(layers.Dense(100, input_dim=max_len, activation="relu"))
+	model.add(layers.Dense(50, activation="relu"))
+	model.add(layers.Dense(25, activation="relu"))
+	model.add(layers.Dense(1, activation="sigmoid"))
+	model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+	return model
 
 
 def pick_best_model(identifier, x, y, param_grid=None, embedding_dim=100, epochs=5, n_jobs=-1,
                     batch_size=20, save_logs=True):
-    x = [tokenize(text) for text in x]
+	x = [tokenize(text) for text in x]
 
-    x_train, x_test, y_train, y_test = shuffle_split_data(x, y, 0.2, True)
-    x_train, x_test, vocab_size, tokenizer = convert_input(x_train, x_test)
+	x_train, x_test, y_train, y_test = shuffle_split_data(x, y, 0.2, True)
+	x_train, x_test, vocab_size, tokenizer = convert_input(x_train, x_test)
 
-    if param_grid is None:
-        param_grid = {
-           "num_filters": [32, 64, 128, 256],
-           "kernel_size": [3, 5, 7],
-           "vocab_size": [vocab_size],
-           "embedding_dim": [embedding_dim],
-            "max_len": [x_train.shape[1]]
-        }
+	if param_grid is None:
+		param_grid = {
+			"num_filters": [32, 64, 128, 256],
+			"kernel_size": [3, 5, 7],
+			"vocab_size": [vocab_size],
+			"embedding_dim": [embedding_dim],
+			"max_len": [x_train.shape[1]]
+		}
 
-        model = KerasClassifier(build_fn=create_model, epochs=epochs, batch_size=batch_size, verbose=True)
+		model = KerasClassifier(build_fn=create_model, epochs=epochs, batch_size=batch_size, verbose=True)
 
-        grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid, cv=min(4, len(y_train)), verbose=2,
-                                  n_iter=5, n_jobs=n_jobs)
+		grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid, cv=min(4, len(y_train)), verbose=2,
+		                          n_iter=5, n_jobs=n_jobs)
 
+		grid_result = grid.fit(x_train, y_train)
+		best_model = grid_result.best_estimator_
 
+		config = {
+			'epochs': epochs,
+			'batch_size': batch_size,
+			'max_len': x_train.shape[1],
+			'padding': 'post'
+		}
 
+		if save_logs:
+			logs_file = f'logs/{identifier}.logs'
+			with open(logs_file, 'w') as f:
+				info = {
+					'model_identifier': identifier,
+					'full_dataset_size': len(x),
+					'Best accuracy': grid_result.best_score_,
+					'Test accuracy': grid.score(x_test, y_test)
+				}
+				json.dump(info, f)
 
-        grid_result = grid.fit(x_train, y_train)
-        best_model = grid_result.best_estimator_
+		save_model(identifier, config, best_model, tokenizer)
 
-        config = {
-            'epochs': epochs,
-            'batch_size': batch_size,
-            'max_len': x_train.shape[1],
-            'padding': 'post'
-        }
-
-        if save_logs:
-            logs_file = f'logs/{identifier}.logs'
-            with open(logs_file, 'w') as f:
-                info = {
-                    'model_identifier': identifier,
-                    'full_dataset_size': len(x),
-                    'Best accuracy': grid_result.best_score_,
-                    'Test accuracy': grid.score(x_test, y_test)
-                }
-                json.dump(info, f)
-
-        save_model(identifier, config, best_model, tokenizer)
-
-        return config, best_model, tokenizer
+		return config, best_model, tokenizer
 
 
 def predict(identifier, x):
-    config, model, tokenizer = read_model(identifier)
+	config, model, tokenizer = read_model(identifier)
 
-    classifier = KerasClassifier(build_fn=create_model, epochs=config['epochs'], batch_size=config['batch_size'],
-                                 verbose=True)
+	classifier = KerasClassifier(build_fn=create_model, epochs=config['epochs'], batch_size=config['batch_size'],
+	                             verbose=True)
 
-    classifier.model = model
-    x = [tokenize(text) for text in x]
-    x = pad_sequences(tokenizer.texts_to_sequences(x), padding=config['padding'], maxlen=config['max_len'])
+	classifier.model = model
+	x = [tokenize(text) for text in x]
+	x = pad_sequences(tokenizer.texts_to_sequences(x), padding=config['padding'], maxlen=config['max_len'])
 
-    return model.predict(x)
+	return model.predict(x)
