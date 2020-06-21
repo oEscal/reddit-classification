@@ -3,9 +3,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 
 from .utils import occurrences_per_label, knee_finder, sort_data_by_tfidf_frequency, \
-    prune_vocabulary_until_normalized
+    prune_vocabulary_until_normalized, shuffle_split_data, convert_input, tokenize
 from .data_treatment import read_data
-from .classifier import shuffle_split_data, convert_input, tokenize
+from .classifier import pick_best_model
 
 
 def data_distribution(title, labels, counters, path):
@@ -56,13 +56,33 @@ def pruned_vocabulary_frequencies(path, title, x, terms, show_knee=True, limit=0
         plt.clf()
 
 
+def plot_accuracy_function(history, path):
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'val'], loc='upper left')
+    plt.savefig(path, bbox_inches='tight', dpi=400)
+    plt.clf()
+
+
 def main():
+    graphics_path = "graphics"
+    output_path = "models"
+
     x, y = read_data('data/pruned_5_entries.tsv')
 
+    identifier = "modelo"
+    history, _, _, _ = pick_best_model(identifier, x, y, output_path)
+
+    plot_accuracy_function(history, f"{graphics_path}/accuracy_function.png")
+
+    return
     occurrences_per_label_dict = occurrences_per_label(y)
 
     data_distribution("Full data distribution", list(occurrences_per_label_dict.keys()),
-                      list(occurrences_per_label_dict.values()), "graphics/full_data_distribution.png")
+                      list(occurrences_per_label_dict.values()), f"{graphics_path}/full_data_distribution.png")
 
     x_train, x_test, y_train, y_test = shuffle_split_data(x, y, 0.2, True)
 
@@ -70,10 +90,10 @@ def main():
     test_occurrences_per_label_dict = occurrences_per_label(y_test)
 
     data_distribution("Train data distribution", list(train_occurrences_per_label_dict.keys()),
-                      list(train_occurrences_per_label_dict.values()), "graphics/train_data_distribution.png")
+                      list(train_occurrences_per_label_dict.values()), f"{graphics_path}/train_data_distribution.png")
 
     data_distribution("Test data distribution", list(test_occurrences_per_label_dict.keys()),
-                      list(test_occurrences_per_label_dict.values()), "graphics/test_data_distribution.png")
+                      list(test_occurrences_per_label_dict.values()), f"{graphics_path}/test_data_distribution.png")
 
     x_train = [tokenize(text) for text in x_train]
     x_test = [tokenize(text) for text in x_test]
