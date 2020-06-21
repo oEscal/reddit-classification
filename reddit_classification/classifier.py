@@ -53,7 +53,7 @@ def pick_best_model(identifier, x, y, output_path, epochs=50, batch_size=500, sa
         }
         save_logs(identifier, data)
 
-    save_model(identifier, config, model, tf, output_path)
+    save_model(identifier, config, model.model.get_weights(), tf, output_path)
 
     return history, config, model, tf
 

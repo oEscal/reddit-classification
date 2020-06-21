@@ -123,13 +123,13 @@ def save_model(identifier, config, model, tokenizer, path='models'):
     full_path = f'{path}/{identifier}'
     Path(full_path).mkdir(parents=True, exist_ok=True)
 
-    with open(f'{full_path}config.json', 'w') as f:
+    with open(f'{full_path}/config.json', 'w') as f:
         json.dump(config, f)
 
-    with open(f'{full_path}model.bin', 'wb') as f:
-        pickle.dump(model.model, f)
+    with open(f'{full_path}/model.bin', 'wb') as f:
+        pickle.dump(model, f)
 
-    with open(f'{full_path}tokenizer.bin', 'wb') as f:
+    with open(f'{full_path}/tokenizer.bin', 'wb') as f:
         pickle.dump(tokenizer, f)
 
 
