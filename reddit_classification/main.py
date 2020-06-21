@@ -1,5 +1,5 @@
-from data_treatment import read_data
-from classifier import pick_best_model
+from reddit_classification.data_treatment import read_data
+from reddit_classification.classifier import pick_best_model
 
 
 def main():
