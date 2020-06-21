@@ -2,7 +2,7 @@ import csv
 import random
 
 
-def read_data(file_path='data/entries.tsv'):
+def read_data(file_path='/kaggle/input/taa-trabalho2-1/entries.tsv'):
     x, y = [], []
 
     with open(file_path) as f:
