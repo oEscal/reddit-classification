@@ -1,5 +1,5 @@
-from data_treatment import read_data
 from classifier import pick_best_model
+from data_treatment import read_data
 
 
 def main(input_path="data/", output_path="models/"):
