@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='reddit-classification',
@@ -7,6 +7,6 @@ setup(
     author='Pedro Escaleira and Rafael Simões',
     author_email='pedroescaleira@hotmail.com',
     license='unlicense',
-    packages=['reddit-classification'],
+    packages=find_packages(),
     zip_safe=False
 )
