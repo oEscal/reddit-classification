@@ -46,7 +46,7 @@ def prune_vocabulary(entries, terms):
 
 
 def knee_finder(x, y):
-    kn = KneeLocator(x, y, curve='convex', direction='decreasing', S=10)
+    kn = KneeLocator(x, y, curve='convex', direction='decreasing', S=5)
     return kn.knee
 
 
