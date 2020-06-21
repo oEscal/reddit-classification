@@ -2,7 +2,7 @@ import csv
 import random
 
 
-def read_data(file_path='/kaggle/input/taa-trabalho2-1/entries.tsv'):
+def read_data(file_path='data/entries.tsv'):
     x, y = [], []
 
     with open(file_path) as f:
@@ -41,6 +41,6 @@ def write_data(x, y, file_path):
             tsv_writer.writerow([y[i], x[i]])
 
 
-x, y = read_data("data/entries.tsv")
-x, y = prune_data(x, y, 100)
-write_data(x, y, "data/pruned_100_entries.tsv")
+# x, y = read_data("data/entries.tsv")
+# x, y = prune_data(x, y, 100)
+# write_data(x, y, "data/pruned_100_entries.tsv")

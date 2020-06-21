@@ -1,4 +1,5 @@
 import pickle
+import time
 
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
@@ -10,7 +11,8 @@ from reddit_classification.data_treatment import read_data
 
 
 def main():
-	number_classes = 100
+	initial_time = time.time()
+	number_classes = 0
 	if number_classes:
 		X, y = read_data(f"data/pruned_{number_classes}_entries.tsv")
 	else:
@@ -51,6 +53,8 @@ def main():
 	print('precision@1 =', np.mean(y_test == y_pred))
 	print('precision@3 =', precision_at_k(y_test, y_pred_proba, 3))
 	print('precision@5 =', precision_at_k(y_test, y_pred_proba, 20))
+
+	print(time.time() - initial_time)
 
 
 if __name__ == "__main__":
