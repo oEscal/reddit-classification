@@ -10,6 +10,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk import download, WordNetLemmatizer
 
+
 download('punkt')
 download('stopwords')
 download('wordnet')
