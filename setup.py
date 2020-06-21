@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='reddit-classification',
+    name='reddit_classification',
     version='0.0.1',
     description='TAA project 2 package',
     author='Pedro Escaleira and Rafael Simões',
