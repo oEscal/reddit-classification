@@ -11,6 +11,10 @@ from reddit_classification.data_treatment import read_data
 
 
 def main():
+	"""
+	from https://www.kaggle.com/mswarbrickjones/starter-naive-bayes-benchmark-p-at-5-0-88
+	"""
+
 	initial_time = time.time()
 	number_classes = 0
 	if number_classes:
