@@ -29,7 +29,11 @@ def main():
 	y_test = label_encoder.transform(y_test)
 
 	# extract features
-	X_train, X_test, tf = convert_input(X_train, X_test)
+	X_train, X_test, token_frequencies = convert_input(X_train, X_test)
+
+	# save token frequencies
+	with open(f"reddit_bayes/token_frequencies/token_frequencies_{number_classes}", 'wb') as file:
+		pickle.dump(token_frequencies, file)
 
 	# train
 	model = MultinomialNB(alpha=0.1)
