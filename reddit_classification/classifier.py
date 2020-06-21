@@ -24,29 +24,28 @@ def tokenize(text, language='english'):
     table = str.maketrans('', '', string.punctuation)
     words = [w.translate(table) for w in tokens]
     stop_words = set(stopwords.words(language))
-    stop_words.add('lb')
 
     lemmatizer = WordNetLemmatizer()
-    words = [lemmatizer.lemmatize(w, pos="v") for w in words if w not in stop_words]
+    words = [lemmatizer.lemmatize(w, pos="v") for w in words if w not in stop_words and not w.isdigit() and len(w) > 2]
 
     return ' '.join(words)
 
 
 def convert_input(x_train, x_test):
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2))
+    tfidf = TfidfVectorizer(ngram_range=(1, 2), min_df=5)
 
-    x_train_v = vectorizer.fit_transform(x_train)
-    terms = vectorizer.get_feature_names()
+    x_train_v = tfidf.fit_transform(x_train)
+    terms = tfidf.get_feature_names()
 
-    pruned_terms_index, _, _ = prune_vocabulary_until_normalized(x_train_v, terms, limit=100)
+    pruned_terms_index, _, _ = prune_vocabulary_until_normalized(x_train_v, terms, limit=200)
     pruned_terms = [terms[term_index] for term_index in pruned_terms_index]
 
-    vectorizer = CountVectorizer(vocabulary=pruned_terms)
+    tf = CountVectorizer(vocabulary=pruned_terms)
 
-    x_train = vectorizer.fit_transform(x_train).todense()
-    x_test = vectorizer.transform(x_test).todense()
+    x_train = tf.fit_transform(x_train).todense()
+    x_test = tf.transform(x_test).todense()
 
-    return x_train, x_test, len(vectorizer.get_feature_names()), vectorizer
+    return x_train, x_test, len(tf.get_feature_names()), tf
 
 
 def shuffle_split_data(x, y, test_size=0.25, shuffle=True):
@@ -79,10 +78,19 @@ def pick_best_model(identifier, x, y, output_path, param_grid=None, epochs=200, 
         model = KerasClassifier(build_fn=create_model, epochs=epochs, batch_size=batch_size, verbose=True)
 
         grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid, cv=min(4, len(y_train)), verbose=2,
-                                  n_jobs=n_jobs)
+                                  n_iter=1, n_jobs=n_jobs)
 
         grid_result = grid.fit(x_train, y_train)
+
         best_model = grid_result.best_estimator_
+
+        #plt.plot(best_model.model.history['acc'])
+        #plt.plot(best_model.model.history['val_acc'])
+        #plt.title('model accuracy')
+        #plt.ylabel('accuracy')
+        #plt.xlabel('epoch')
+        #plt.legend(['train', 'val'], loc='upper left')
+        #plt.show()
 
         config = {
             'epochs': epochs,
