@@ -11,7 +11,7 @@ from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
-from reddit_classification.utils import read_model, save_model, prune_vocabulary_until_normalized
+from utils import read_model, save_model, prune_vocabulary_until_normalized
 
 download('punkt')
 download('stopwords')
@@ -64,7 +64,7 @@ def create_model(input_dim):
     return model
 
 
-def pick_best_model(identifier, x, y, param_grid=None, epochs=200, n_jobs=-1,
+def pick_best_model(identifier, x, y, output_path, param_grid=None, epochs=200, n_jobs=-1,
                     batch_size=50, save_logs=True):
     x = [tokenize(text) for text in x]
 

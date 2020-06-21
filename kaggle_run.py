@@ -2,5 +2,4 @@
 !pip install kneed
 from reddit_classification.main import main
 
-main()
-
+main(input_path="/kaggle/input/taa-trabalho2-1/")
