@@ -7,6 +7,7 @@ from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from utils import read_model, save_model, prune_vocabulary_until_normalized, save_logs
+from matplotlib import pyplot as plt
 
 download('punkt')
 download('stopwords')
@@ -27,12 +28,12 @@ def tokenize(text, language='english'):
 
 
 def convert_input(x_train, x_test):
-    tfidf = TfidfVectorizer(ngram_range=(1, 2))
+    tfidf = TfidfVectorizer(ngram_range=(1, 2), min_df=10)
 
     x_train_v = tfidf.fit_transform(x_train)
     terms = tfidf.get_feature_names()
 
-    limit = 200
+    limit = 100
 
     pruned_terms_index, _, _ = prune_vocabulary_until_normalized(x_train_v, terms, limit=limit)
     pruned_terms = [terms[term_index] for term_index in pruned_terms_index]
@@ -53,14 +54,14 @@ def shuffle_split_data(x, y, test_size=0.25, shuffle=True):
 def create_model(input_dim):
     model = Sequential()
     model.add(layers.Dense(100, activation="relu", input_dim=input_dim))
-    model.add(layers.Dense(50, activation="relu"))
-    model.add(layers.Dense(1, activation='softmax'))
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.add(layers.Dense(100, activation="relu"))
+    model.add(layers.Dense(50, activation='softmax'))
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
     return model
 
 
-def pick_best_model(identifier, x, y, output_path, epochs=500, batch_size=200, save_logs_status=True):
+def pick_best_model(identifier, x, y, output_path, epochs=50, batch_size=200, save_logs_status=True):
     x = [tokenize(text) for text in x]
 
     x_train, x_test, y_train, y_test = shuffle_split_data(x, y, 0.2, True)
@@ -71,6 +72,14 @@ def pick_best_model(identifier, x, y, output_path, epochs=500, batch_size=200, s
                             input_dim=vocab_size, validation_split=0.2)
 
     history = model.fit(x_train, y_train)
+
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'val'], loc='upper left')
+    plt.show()
 
     config = {
         'epochs': epochs,

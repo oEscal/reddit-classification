@@ -41,8 +41,6 @@ def write_data(x, y, file_path):
             tsv_writer.writerow([y[i], x[i]])
 
 
-"""
 x, y = read_data("data/entries.tsv")
-x, y = prune_data(x, y, 5)
-write_data(x, y, "data/pruned_5_entries.tsv")
-"""
+x, y = prune_data(x, y, 50)
+write_data(x, y, "data/pruned_50_entries.tsv")
