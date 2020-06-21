@@ -17,6 +17,24 @@ def sort_data_by_tfidf_frequency(entries, terms):
     return ranking.sort_values('rank', ascending=False)
 
 
+def prune_vocabulary_until_normalized(entries, terms, limit=0):
+    sorted_data = sort_data_by_tfidf_frequency(entries, terms)
+    x, y = sorted_data['index_term'], sorted_data['rank']
+
+    knees_point = []
+
+    while True:
+        knee_point = knee_finder(range(len(x)), y)
+
+        if not knee_point or knee_point < limit:
+            break
+
+        knees_point.append(knee_point)
+        x, y = x[:knee_point], y[:knee_point]
+
+    return x, y, knees_point
+
+
 def prune_vocabulary(entries, terms):
     sorted_data = sort_data_by_tfidf_frequency(entries, terms)
 
@@ -28,7 +46,7 @@ def prune_vocabulary(entries, terms):
 
 
 def knee_finder(x, y):
-    kn = KneeLocator(x, y, curve='convex', direction='decreasing')
+    kn = KneeLocator(x, y, curve='convex', direction='decreasing', S=10)
     return kn.knee
 
 
