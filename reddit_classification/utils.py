@@ -86,3 +86,17 @@ def save_model(identifier, config, model, tokenizer, path='models'):
 
     with open(f'{full_path}/tokenizer.bin', 'wb') as f:
         pickle.dump(tokenizer, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def save_logs(identifier, data, path='logs'):
+    Path(path).mkdir(parents=True, exist_ok=True)
+    logs_file = f'{path}/{identifier}.logs'
+
+    with open(logs_file, 'w') as f:
+        info = {
+            'model_identifier': identifier,
+            'full_dataset_size': data.get('data_size', -1),
+            'Best accuracy': data.get('train_acc', -1),
+            'Test accuracy': data.get('test_acc', -1)
+        }
+        json.dump(info, f)
