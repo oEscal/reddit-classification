@@ -2,12 +2,12 @@ import string
 from nltk import download, WordNetLemmatizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from keras import Sequential, layers
-from keras.wrappers.scikit_learn import KerasClassifier
+from tensorflow.keras import Sequential, layers
+from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
-from utils import read_model, save_model, prune_vocabulary_until_normalized, save_logs
-from matplotlib import pyplot as plt
+from .utils import read_model, save_model, prune_vocabulary_until_normalized, save_logs
+
 
 download('punkt')
 download('stopwords')
@@ -72,14 +72,6 @@ def pick_best_model(identifier, x, y, output_path, epochs=50, batch_size=200, sa
                             input_dim=vocab_size, validation_split=0.2)
 
     history = model.fit(x_train, y_train)
-
-    plt.plot(history.history['accuracy'])
-    plt.plot(history.history['val_accuracy'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'val'], loc='upper left')
-    plt.show()
 
     config = {
         'epochs': epochs,
