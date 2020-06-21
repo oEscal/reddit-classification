@@ -28,7 +28,7 @@ def tokenize(text, language='english'):
     return ' '.join(words)
 
 
-def convert_input(x_train, x_test, limit=200, min_df=10):
+def convert_input(x_train, x_test, limit=500, min_df=10):
     tfidf = TfidfVectorizer(ngram_range=(1, 2), min_df=min_df)
 
     x_train_v = tfidf.fit_transform(x_train)
