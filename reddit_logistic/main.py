@@ -73,7 +73,7 @@ def main():
 	X_train = X_train / max_train
 	X_cv = X_cv / max_train
 
-	c_s = [1000000, 10000000, 100000000]           # 1, 10, 100, 1000, 10000, 100000
+	c_s = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000]
 	for c in c_s:
 		initial_time = time.time()
 		model = LogisticRegression(C=c, multi_class='ovr', max_iter=5000)
