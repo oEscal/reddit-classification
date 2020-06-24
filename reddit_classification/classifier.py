@@ -80,7 +80,7 @@ def pick_best_model(identifier, x, y, output_path, epochs=200, batch_size=500, s
 
     fold_var = 1
 
-    early_stopping_callback = callbacks.EarlyStopping(monitor='val_loss', patience=5, mode='min')
+    early_stopping_callback = callbacks.EarlyStopping(monitor='val_loss', patience=5)
 
     f_name = f"_last_same_n_neurons_regularization_factor_{regularization_factor}_new"
 
@@ -144,4 +144,4 @@ def pick_best_model(identifier, x, y, output_path, epochs=200, batch_size=500, s
 
     save_model(identifier, config, model.model.get_weights(), tf, output_path)
 
-    return config, model, tf, [all_data, history.history]
+    return config, model, tf
