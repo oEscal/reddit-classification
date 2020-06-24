@@ -1,8 +1,10 @@
 import argparse
 import pickle
+import sys
 import time
 
 import numpy as np
+from sklearn.metrics import classification_report, accuracy_score
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.preprocessing import LabelEncoder
 
@@ -86,38 +88,59 @@ def train(number_classes=50, retrain=0):
 		initial_alpha *= 10
 
 
-def interpretation(number_classes=50):
-	X_train, X_cv, _, y_train, y_cv, _ = get_data(number_classes)
+def interpretation(number_classes=50, retrain=0):
+	X_train, X_cv, X_test, y_train, y_cv, y_test = get_data(number_classes)
 
 	# load token frequencies
 	with open(f"reddit_bayes/token_frequencies/token_frequencies_{number_classes}", 'rb') as file:
 		token_frequencies = pickle.load(file)
 		X_train = token_frequencies.fit_transform(X_train).todense()
 		X_cv = token_frequencies.transform(X_cv).todense()
+		X_test = token_frequencies.transform(X_test).todense()
 
 	# normalize
-	X_train = X_train / np.max(X_train)
-	X_cv = X_cv / np.max(X_train)
+	train_max = np.max(X_train)
+	X_train = X_train / train_max
+	X_cv = X_cv / train_max
+	X_test = X_test / train_max
 
-	accuracy_over_alpha_train = {}
-	accuracy_over_alpha_cv = {}
-	initial_alpha = MIN_ALPHA
-	while initial_alpha <= MAX_ALPHA:
-		for i in [1, 5]:
-			alpha = initial_alpha * i
+	if retrain:
+		with open(f"reddit_bayes/models/model_{number_classes}_{format(retrain, '.10g')}_retrain", 'rb') as file:
+			model: MultinomialNB = pickle.load(file)
 
-			with open(f"reddit_bayes/models/model_{number_classes}_{format(alpha, '.10g')}", 'rb') as file:
-				model: MultinomialNB = pickle.load(file)
+		y_pred = model.predict(X_test)
+		report = classification_report(y_test, y_pred, output_dict=True)
 
-			accuracy_over_alpha_train[alpha] = model.score(X_train, y_train)
-			accuracy_over_alpha_cv[alpha] = model.score(X_cv, y_cv)
+		print(r"\begin{tabular}{l c c c c}")
+		print(r"Class & Accuracy & Recall & Precision & F1 Score\\ \hline")
+		for key in report:
+			if key.isdigit():
+				accuracy = accuracy_score(y_test[y_test == int(key)], y_pred[y_test == int(key)])
+				print(f"{key} & {accuracy:.3} & {report[key]['recall']:.3} & "
+				      f"{report[key]['precision']:.3} & {report[key]['f1-score']:.3}\\\\")
+		print(r"\hline" + f"\nMacro Average & {report['accuracy']:.3} & {report['macro avg']['recall']:.3} & "
+		                  f"{report['macro avg']['precision']:.3} & {report['macro avg']['f1-score']:.3}\\\\")
+		print(r"\end{tabular}")
+	else:
+		accuracy_over_alpha_train = {}
+		accuracy_over_alpha_cv = {}
+		initial_alpha = MIN_ALPHA
+		while initial_alpha <= MAX_ALPHA:
+			for i in [1, 5]:
+				alpha = initial_alpha * i
 
-		initial_alpha *= 10
+				with open(f"reddit_bayes/models/model_{number_classes}_{format(alpha, '.10g')}", 'rb') as file:
+					model: MultinomialNB = pickle.load(file)
 
-	plot_accuracy_over_var(list(accuracy_over_alpha_cv.keys()), list(accuracy_over_alpha_cv.values()),
-	                       "alpha", "graphics", hold_on=True)
-	plot_accuracy_over_var(list(accuracy_over_alpha_train.keys()), list(accuracy_over_alpha_train.values()),
-	                       "alpha", "graphics", max_value=False, legend=["Cross Validation score", "Training score"])
+				accuracy_over_alpha_train[alpha] = model.score(X_train, y_train)
+				accuracy_over_alpha_cv[alpha] = model.score(X_cv, y_cv)
+
+			initial_alpha *= 10
+
+		plot_accuracy_over_var(list(accuracy_over_alpha_cv.keys()), list(accuracy_over_alpha_cv.values()),
+		                       "alpha", "graphics", hold_on=True)
+		plot_accuracy_over_var(list(accuracy_over_alpha_train.keys()), list(accuracy_over_alpha_train.values()),
+		                       "alpha", "graphics", max_value=False, legend=["Cross Validation score", "Training score"])
 
 
 def main(args):
@@ -126,7 +149,7 @@ def main(args):
 	if args.train:
 		train(number_classes, retrain=args.retrain)
 	if args.interpretation:
-		interpretation(number_classes)
+		interpretation(number_classes, retrain=args.retrain)
 
 
 if __name__ == "__main__":
