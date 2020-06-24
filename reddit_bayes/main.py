@@ -60,7 +60,7 @@ def main():
 
 	# normalize
 	X_train = X_train / np.max(X_train)
-	X_cv = X_cv / np.max(X_cv)
+	X_cv = X_cv / np.max(X_train)
 
 	# train
 	initial_alpha = 1e-10

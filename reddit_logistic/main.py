@@ -15,18 +15,21 @@ from reddit_classification.utils import convert_input
 from reddit_classification.data_treatment import read_data
 
 
-def evaluate_model(model, X, y, X_test, y_test, target_names=None):
-	scores = cross_val_score(model, X, y, cv=5, scoring='accuracy')
-	scores_test = cross_val_score(model, X_test, y_test, cv=5, scoring='accuracy')
-
-	print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std()))
-	print("Accuracy test: %0.2f (+/- %0.2f)" % (scores_test.mean(), scores_test.std()))
-
-	print("Test classification report: ")
-	if target_names is None:
-		target_names = model.classes_
-	# print(classification_report(y_test, model.predict(X_test), target_names=target_names))
-	print("Test confusion matrix: ")
+def evaluate_model(model: LogisticRegression, X, y, X_test, y_test, target_names=None):
+	print(f"Training accuracy: {model.score(X, y)}")
+	print(f"CV accuracy: {model.score(X_test, y_test)}")
+	#scores = cross_val_score(model, X, y, cv=5, scoring='accuracy')
+	#print("adeus")
+	#scores_test = cross_val_score(model, X_test, y_test, cv=5, scoring='accuracy')
+#
+	#print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std()))
+	#print("Accuracy test: %0.2f (+/- %0.2f)" % (scores_test.mean(), scores_test.std()))
+#
+	#print("Test classification report: ")
+	#if target_names is None:
+	#	target_names = model.classes_
+	## print(classification_report(y_test, model.predict(X_test), target_names=target_names))
+	#print("Test confusion matrix: ")
 	# print_confusion_matrix(confusion_matrix(y_test, model.predict(X_test)), class_names=target_names)
 
 
@@ -66,18 +69,23 @@ def main():
 		X_cv = token_frequencies.transform(X_cv).todense()
 
 	# normalize
-	X_train = X_train / np.max(X_train)
-	X_cv = X_cv / np.max(X_cv)
+	max_train = np.max(X_train)
+	X_train = X_train / max_train
+	X_cv = X_cv / max_train
 
-	c_s = [1, 10, 100, 1000, 10000]
+	c_s = [1000000, 10000000, 100000000]           # 1, 10, 100, 1000, 10000, 100000
 	for c in c_s:
 		initial_time = time.time()
-		model = LogisticRegression(C=c, multi_class='ovr', max_iter=1000)
+		model = LogisticRegression(C=c, multi_class='ovr', max_iter=5000)
 
 		model.fit(X_train, y_train)
 
 		with open(f"reddit_logistic/models/model_{number_classes}_{c}", 'wb') as file:
 			pickle.dump(model, file)
+
+		print(f"c {c}:")
+		# with open(f"reddit_logistic/models/model_{number_classes}_{c}", 'rb') as file:
+		# 	model = pickle.load(file)
 
 		evaluate_model(model, X_train, y_train, X_cv, y_cv)
 
