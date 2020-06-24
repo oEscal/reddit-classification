@@ -1,4 +1,5 @@
 import string
+import math
 import json
 import pickle
 from pathlib import Path
@@ -9,7 +10,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk import download, WordNetLemmatizer
-
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+import os.path
 
 download('punkt')
 download('stopwords')
@@ -17,7 +19,6 @@ download('wordnet')
 
 
 def tokenize(text, language='english'):
-
     tokens = word_tokenize(text)
     tokens = [w.lower() for w in tokens]
     table = str.maketrans('', '', string.punctuation)
@@ -30,8 +31,8 @@ def tokenize(text, language='english'):
     return ' '.join(words)
 
 
-def convert_input(x_train, x_test, limit=200, min_df=10):
-    tfidf = TfidfVectorizer(ngram_range=(1, 2), min_df=min_df)
+def convert_input(x_train, x_test, limit=500, min_df=10):
+    tfidf = TfidfVectorizer(ngram_range=(1, 2))
 
     x_train_v = tfidf.fit_transform(x_train)
     terms = tfidf.get_feature_names()
@@ -144,9 +145,60 @@ def save_logs(identifier, data, path='logs'):
             'model_identifier': identifier,
             'full_dataset_size': data.get('data_size', -1),
             'Best accuracy': data.get('train_acc', -1),
-            'Test accuracy': data.get('test_acc', -1)
+            'Test accuracy': data.get('test_acc', -1),
+            'mean_train_acc': data.get('mean_train_acc', -1),
+            'mean_val_acc': data.get('mean_val_acc', -1)
         }
         json.dump(info, f)
 
 
+def best_neuron_number(input_neurons, output_neurons, samples_number, alpha=2):
+    return math.ceil(samples_number / (alpha * (input_neurons + output_neurons)))
 
+
+class Analyser:
+    __instance = None
+
+    @staticmethod
+    def getInstance():
+        """ Static access method. """
+        if Analyser.__instance is None:
+            Analyser()
+        return Analyser.__instance
+
+    def __init__(self):
+        """ Virtually private constructor. """
+        if Analyser.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            Analyser.__instance = SentimentIntensityAnalyzer()
+
+
+def sentiment_analysis(text):
+    analyser = Analyser.getInstance()
+    snt = analyser.polarity_scores(text)
+    score = snt['compound']
+    return score
+
+
+def save_tokenizer(labels_size, data, path='tf'):
+    Path(path).mkdir(parents=True, exist_ok=True)
+
+    with open(f'{path}/{labels_size}_tf.bin', 'wb') as f:
+        pickle.dump(data, f)
+
+
+def get_tokenizer(labels_size, path='tf'):
+    full_path = f'{path}/{labels_size}_tf.bin'
+    if os.path.exists(full_path):
+        with open(full_path, 'rb') as f:
+            return True, pickle.load(f)
+    else:
+        return False, None
+
+
+def save_confusion_matrix(data, identifier, path='c_matrix'):
+    Path(path).mkdir(parents=True, exist_ok=True)
+
+    with open(f'{path}/{identifier}_c_matrix.bin', 'wb') as f:
+        pickle.dump(data, f)
