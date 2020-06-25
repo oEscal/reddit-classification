@@ -135,3 +135,4 @@ models/
 logs/
 graphics/
 token_frequencies/
+*.zip

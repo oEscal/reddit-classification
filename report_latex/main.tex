@@ -1,0 +1,69 @@
+\documentclass[conference]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{textcomp}
+
+% *** GRAPHICS RELATED PACKAGES ***
+\usepackage[pdftex]{graphicx}
+\graphicspath{{./figures/}}
+\DeclareGraphicsExtensions{.png}
+
+% *** FOOTNOTES PACKAGE ***
+\usepackage[bottom]{footmisc}
+
+
+% References package
+\usepackage[unicode=false,psdextra]{hyperref}
+
+% Floating objects, captions and references
+\usepackage{flafter}
+\usepackage[noabbrev,nameinlink,capitalise]{cleveref}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Reddit classification}
+
+\author{\IEEEauthorblockN{Pedro Escaleira}
+\IEEEauthorblockA{Departamento de Electrónica\\ Telecomunicações e Informática\\
+\textit{Universidade de Aveiro}\\
+Aveiro, Portugal \\
+escaleira@ua.pt}
+\and
+\IEEEauthorblockN{Rafael Simões}
+\IEEEauthorblockA{Departamento de Electrónica\\ Telecomunicações e Informática\\
+\textit{Universidade de Aveiro}\\
+Aveiro, Portugal \\
+rafaeljsimoes@ua.pt}
+}
+
+\maketitle
+
+\begin{abstract}
+Aprendizagem Automática é uma área das ciências da computação com cada vez mais destaque nos dias que correm. Desde a sua utilização em campos como a saúde, sistemas bancários, \textit{self driving cars}, nas aplicações de telemóvel do utilizador comum, entre outros, não é surpresa para ninguém que se tornou uma realidade sem a qual a sociedade em que vivemos seria muito diferente do que é hoje. \\
+Neste relatório, iremos descrever a utilização de alguns dos algoritmos mais conhecidos e usados nesta área e o seu comportamento perante diferentes situações, usando para isso um \textit{dataset} de \textit{posts} criados na rede social \textit{Reddit}.
+
+\end{abstract}
+
+\input{sections/introduction.tex}
+\input{sections/tools.tex}
+\input{sections/data.tex}
+\input{sections/sentiment}
+\input{sections/neural_networks}
+\input{sections/bayes.tex}
+\input{sections/logistic.tex}
+\input{sections/conclusion.tex}
+\input{sections/agradecimentos}
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography.bib}
+
+\end{document}

@@ -1,6 +1,5 @@
 import argparse
 import pickle
-import sys
 import time
 
 import numpy as np
