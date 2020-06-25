@@ -3,12 +3,10 @@ from .data_treatment import read_data
 
 
 def main(input_path="data", output_path="models"):
-    x, y = read_data(f"{input_path}/pruned_5_entries.tsv")
-    print(len(x))
-    return
-    identifier = "5_entries_model"
-
-    _, config, best_model, tokenizer = pick_best_model(identifier, x, y, output_path)
+    entries = 5
+    x, y = read_data(f"{input_path}/pruned_{entries}_entries.tsv")
+    identifier = f"{entries}_entries_model_last_same_neurons"
+    config, best_model, tokenizer = pick_best_model(identifier, x, y, output_path, neurons=200)
 
 
 if __name__ == '__main__':

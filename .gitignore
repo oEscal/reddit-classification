@@ -134,5 +134,8 @@ models/
 .idea/
 logs/
 graphics/
+models/
+c_matrix/
+tf/
 token_frequencies/
 *.zip
