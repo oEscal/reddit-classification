@@ -1,6 +1,8 @@
-\section{Estudo com Logistic Regression}
+\section{Estudo com Regressão Logística}
 
-Apesar de termos encontrado o trabalho apresentado na secção \ref{sec:bayes}, encontra-mos também outros trabalhos que se insidiam na catalogação de texto, mas que não utilizavam o \textit{dataset} que usámos. Um destes trabalhos foi um criado por um outro utilizador do \textit{Kaggle}, em que usava, entre outros algoritmos, \textit{logistic regression} para catalogar o tema de noticias da \textit{BBC}. O seu estudo pode ser encontrado em \cite{kaggle_logistic}. Neste estudo é notado que foi atingida uma \textit{accuracy} para os dados de teste de $0.79$ para as 20 classes em estudo.
+A \textbf{Regressão Logística} é um algoritmo que permite, estatisticamente e a partir dum conjuntos de observações de eventos passados, criar um modelo que possibilite a previsão de valores associados a um possível evento (caracterizado por um conjunto de variáveis).
+
+Apesar de termos encontrado o trabalho apresentado na secção \ref{sec:bayes}, encontra-mos também outros trabalhos que se insidiam na catalogação de texto, mas que não utilizavam o \textit{dataset} que usámos. Um destes trabalhos foi um criado por um outro utilizador do \textit{Kaggle}, em que usava, entre outros algoritmos, \textbf{Regressão Logística} para catalogar o tema de noticias da \textit{BBC}. O seu estudo pode ser encontrado em \cite{kaggle_logistic}. Neste estudo é notado que foi atingida uma \textit{accuracy} para os dados de teste de $0.79$ para as 20 classes em estudo.
 
 \subsection{Repartição dos dados}
 A divisão dos dados neste estudo foi a mesma usada descrita na secção \ref{subsub:bayes_data}.
@@ -8,7 +10,7 @@ A divisão dos dados neste estudo foi a mesma usada descrita na secção \ref{su
 
 \subsection{Resultados obtidos}
 
-Tal como na secção \ref{sub:results_bayes}, começamos por adaptar o código do autor original. Neste caso, sendo que ele possuía vários algoritmos para realizar o seu estudo, foi necessário filtrar só o código correspondente ao estudo de \textit{logistic regression}. Tal como no estudo das redes de \textit{bayes}, neste caso usamos também a técnica de extracção de \textit{features} explicada na secção \ref{subsub:data_pre_processing} ao invés da usada pelo autor.
+Tal como na secção \ref{sub:results_bayes}, começamos por adaptar o código do autor original. Neste caso, sendo que ele possuía vários algoritmos para realizar o seu estudo, foi necessário filtrar só o código correspondente ao estudo de \textit{Regressão Logística}. Tal como no estudo das Redes de Bayes, neste caso usamos também a técnica de extracção de \textit{features} explicada na secção \ref{subsub:data_pre_processing} ao invés da usada pelo autor.
 
 Ao fazermos o estudo da variação do hiperparâmetro C \footnote{Parâmetro de regularização. Quanto maior o seu valor, maior será a \textit{regularization strength}}, para 5000 iterações com \textit{early stopping}, obtivemos a variação de \textit{accuracy} apresentada no gráfico da figura \ref{diagram:accuracy_c_logistic}. Com este gráfico pode-se concluir que o maior valor da \textit{accuracy} para os dados de \textit{cross validation} foi obtido para um valor de $C = 10^{4}$.
 
